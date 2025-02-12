@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* إخفاء شريط التمرير */
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* لمتصفح Internet Explorer و Edge */
+  scrollbar-width: none;  /* لمتصفح Firefox */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;  /* لمتصفح Chrome و Safari */
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font-ibm-arabic), system-ui, sans-serif;
+}
+
+/* تحسينات للغة العربية */
+@layer base {
+  input::placeholder {
+    text-align: right;
+  }
+  
+  input[type="email"],
+  input[type="password"],
+  input[type="text"],
+  input[type="tel"] {
+    text-align: right;
+  }
+}
+
+/* تحسينات للتمرير الأفقي */
+@layer utilities {
+  .smooth-scroll {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .grab-scroll {
+    cursor: grab;
+  }
+
+  .grab-scroll:active {
+    cursor: grabbing;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* تحسينات للهيدر */
+.header-shadow {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08), 
+              0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.header-button {
+  @apply px-4 py-2 rounded-full transition-all duration-200 ease-in-out;
+}
+
+.header-button:hover {
+  @apply bg-gray-100;
+}
