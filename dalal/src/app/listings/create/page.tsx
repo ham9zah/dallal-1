@@ -3,8 +3,12 @@
 import { useState } from 'react';
 import { PhotoIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { toast } from 'react-hot-toast';
 
 export default function CreateListing() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
   const [images, setImages] = useState<string[]>([]);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -18,18 +22,48 @@ export default function CreateListing() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: إضافة منطق حفظ الإعلان
-    console.log({
-      title,
-      description,
-      price,
-      category,
-      location,
-      condition,
-      negotiable,
-      allowBidding,
-      images
-    });
+    setLoading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('title', title);
+      formData.append('description', description);
+      formData.append('price', price);
+      formData.append('category_id', subCategory || mainCategory);
+      formData.append('location', location);
+      formData.append('condition', condition);
+      formData.append('negotiable', negotiable ? '1' : '0');
+      formData.append('allow_bidding', allowBidding ? '1' : '0');
+
+      // إضافة الصور
+      if (images.length > 0) {
+        images.forEach((image, index) => {
+          formData.append(`images[${index}]`, image);
+        });
+      }
+
+      const response = await fetch('http://localhost:8000/api/advertisements', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'حدث خطأ أثناء إضافة الإعلان');
+      }
+
+      const data = await response.json();
+      toast.success('تم إضافة الإعلان بنجاح');
+      router.push(`/listings/${data.id}`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'حدث خطأ أثناء إضافة الإعلان');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -315,13 +349,14 @@ export default function CreateListing() {
               </div>
             </div>
 
-            {/* زر النشر */}
-            <div>
+            {/* زر الإرسال */}
+            <div className="flex justify-end">
               <button
                 type="submit"
-                className="w-full bg-[#f5ca58] text-white py-3 px-4 rounded-md hover:bg-[#e5ba48] transition-colors font-medium text-lg"
+                disabled={loading}
+                className={`px-6 py-2 bg-[#f5ca58] text-white rounded-md hover:bg-[#e5ba48] transition-colors ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                نشر الإعلان
+                {loading ? 'جاري الإضافة...' : 'إضافة الإعلان'}
               </button>
             </div>
           </form>

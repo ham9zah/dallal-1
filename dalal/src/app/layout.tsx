@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Sans_Arabic } from "next/font/google";
+import { Toaster } from 'react-hot-toast';
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { Providers } from "@/providers/Providers";
@@ -12,24 +13,27 @@ const arabic = IBM_Plex_Sans_Arabic({
 });
 
 export const metadata: Metadata = {
-  title: "دلال - منصة البيع والشراء",
-  description: "منصة دلال للبيع والشراء",
+  title: "دلال - منصة الإعلانات المبوبة",
+  description: "منصة دلال للإعلانات المبوبة",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: {
+  children: React.ReactNode
+}) {
   return (
     <html lang="ar" dir="rtl">
-      <body suppressHydrationWarning className={`${arabic.variable} font-sans antialiased min-h-screen flex flex-col`}>
+      <body className="min-h-screen bg-gray-50" suppressHydrationWarning>
         <Providers>
-          <Header />
-          <main className="flex-1">
-            {children}
-          </main>
-          <Footer />
+          <div className="flex flex-col min-h-screen">
+            <Header />
+            <main className="flex-grow pt-28 pb-8">
+              {children}
+            </main>
+            <Footer />
+          </div>
+          <Toaster position="top-center" />
         </Providers>
       </body>
     </html>

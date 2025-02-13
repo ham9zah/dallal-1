@@ -14,7 +14,6 @@ interface AuthModalProps {
 
 export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const auth = useAuth();
-  console.log('حالة المصادقة:', auth); // للتحقق من القيم المتاحة
   const router = useRouter();
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [formData, setFormData] = useState({
@@ -48,11 +47,6 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     setErrors({});
 
     try {
-      console.log('محاولة تسجيل الدخول/التسجيل:', {
-        mode: isLoginMode ? 'تسجيل الدخول' : 'تسجيل جديد',
-        email: formData.email
-      });
-
       let response;
       if (isLoginMode) {
         response = await authService.login({
@@ -71,25 +65,22 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
       
       console.log('استجابة الخادم:', response);
       
-      if (response?.user) {
+      if (response && response.token && response.user) {
+        // تحديث حالة المستخدم
         auth.setUser(response.user);
+        
         console.log('تم تسجيل الدخول بنجاح. المستخدم:', response.user);
+        
+        // إغلاق النافذة والتوجيه للوحة التحكم
         onClose();
         router.push('/dashboard');
-      } else {
-        console.error('لم يتم استلام بيانات المستخدم من الخادم');
-        setErrors({
-          general: ['حدث خطأ في الاستجابة من الخادم']
-        });
+        return;
       }
+      
+      throw new Error('لم يتم استلام بيانات المستخدم من الخادم');
     } catch (error: any) {
       console.error('خطأ في المصادقة:', error);
-      console.error('تفاصيل الخطأ:', {
-        response: error.response?.data,
-        status: error.response?.status,
-        headers: error.response?.headers
-      });
-
+      
       if (error.response?.data?.errors) {
         setErrors(error.response.data.errors);
       } else if (error.response?.data?.message) {
@@ -98,7 +89,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
         });
       } else {
         setErrors({
-          general: ['حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.']
+          general: [error.message || 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.']
         });
       }
     } finally {
@@ -163,8 +154,6 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
                 <div className="sm:flex sm:items-start">
                   <div className="px-6 py-6 text-right w-full">
-                    
-
                     <div className="mt-4">
                       <form onSubmit={handleSubmit} className="space-y-4">
                         {!isLoginMode && (
@@ -217,6 +206,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                               value={formData.phone}
                               onChange={handleInputChange}
                               className="mt-1 block w-full rounded-lg border-gray-300 bg-gray-50 shadow-sm focus:border-[#f5ca58] focus:ring-[#f5ca58] focus:bg-white transition-colors duration-200 text-sm"
+                              required
                             />
                             {errors.phone && (
                               <p className="mt-2 text-sm text-red-600 bg-red-50 px-3 py-1 rounded-md">{errors.phone[0]}</p>

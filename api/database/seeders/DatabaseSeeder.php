@@ -10,9 +10,9 @@ class DatabaseSeeder extends Seeder
     {
         // تشغيل البذور
         $this->call([
-            ResetRolesSeeder::class,
             CategorySeeder::class,
-            ListingSeeder::class,
+            CitySeeder::class,
+            UserSeeder::class,
         ]);
     }
 }
